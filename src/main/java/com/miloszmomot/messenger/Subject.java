@@ -1,8 +1,8 @@
 package com.miloszmomot.messenger;
 
-public interface Subject {
-     void addObserver(Observer observer);
-     void removeObserver(Observer observer);
+public abstract class Subject extends Thread {
+     public abstract void addObserver(Observer observer);
+     public abstract void removeObserver(Observer observer);
      //TODO zmienic string na MessageTemplate
-     void notifyObservers(String string);
+     public abstract void notifyObservers(String string);
 }

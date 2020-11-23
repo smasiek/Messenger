@@ -1,9 +1,6 @@
 package com.miloszmomot.messenger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -23,25 +20,18 @@ public class Main {
 
         observer1.getText();
         observer2.getText();
-
-        ServerThread serverThread;
-
-        try (ServerSocket serverSocket = new ServerSocket(9999)) {
-            while (true) {
-                Socket socket = serverSocket.accept();
-                //Po moich zmianach:
-                serverThread = new ServerThread(socket);
-                serverThread.start(); //przykładowa obsługa żądania
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-        try (Socket socket = new Socket("hostname",9999)){
+        System.out.println("ttest");
+        server.startup();
+        System.out.println("ttest");
+        try (Socket socket = new Socket("127.0.0.1",9999)){
             InputStream input= socket.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             String msg=reader.readLine();
-            System.out.println(msg);
+            System.out.println(msg + " test");
+            server.komenda();
+            msg=reader.readLine();
+            System.out.println(msg + " test");
+
         }catch (UnknownHostException ex){
             System.out.println("Serwer nieosiągalny: " + ex.getMessage());
         }
@@ -49,7 +39,6 @@ public class Main {
             e.printStackTrace();
         }
 
-        System.out.println("kupa");
 
 
 

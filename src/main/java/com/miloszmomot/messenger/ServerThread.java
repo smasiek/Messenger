@@ -20,7 +20,16 @@ public class ServerThread extends Thread{
 
     public void run(){
         try{
-            writer.println("Wiadomosc.");
+            writer.println("Watek serwera wystartowal.");
+            //socket.close();
+        } catch (RuntimeException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public void update(){
+        try{
+            writer.println("asd.");
             socket.close();
         } catch (IOException ex){
             ex.printStackTrace();
