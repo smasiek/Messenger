@@ -1,10 +1,13 @@
 package com.miloszmomot.messenger;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 
+import static sun.plugin2.main.client.LiveConnectSupport.shutdown;
+
 public class ServerThread extends Thread{
-    private Socket socket;
+    private final Socket socket;
     private InputStream input;
     private BufferedReader reader;
     private OutputStream output;
@@ -12,28 +15,27 @@ public class ServerThread extends Thread{
 
     public ServerThread(Socket socket) throws IOException {
         this.socket =socket;
-        this.input=socket.getInputStream();
-        this.reader= new BufferedReader(new InputStreamReader(input));
-        this.output=socket.getOutputStream();
+        input=this.socket.getInputStream();
+        reader= new BufferedReader(new InputStreamReader(input));
+        output=socket.getOutputStream();
         writer=new PrintWriter(output,true);
+
     }
 
     public void run(){
-        try{
-            writer.println("Watek serwera wystartowal.");
-            //socket.close();
-        } catch (RuntimeException ex){
-            ex.printStackTrace();
-        }
+        writer.println("Watek serwera wystartowal.");
+        writer.flush();
+        writer.close();
+
     }
 
-    public void update(){
-        try{
-            writer.println("asd.");
-            socket.close();
-        } catch (IOException ex){
-            ex.printStackTrace();
-        }
-    }
+/*    public void newText(){
+        writer.println("nowy tekst.");
+        writer.flush();
+        writer.close();
+
+    }*/
+
+
 
 }

@@ -13,6 +13,10 @@ import static sun.plugin2.main.client.LiveConnectSupport.shutdown;
 public class Server extends Subject {
     private ArrayList<Observer> observers=new ArrayList<Observer>();
 
+    public Server() throws IOException {
+        serverSocket = new ServerSocket(8080);
+    }
+
     public void addObserver(Observer observer){
         observers.add(observer);
     }
@@ -32,21 +36,22 @@ public class Server extends Subject {
     private Exception serverError=null;
     ExecutorService singleThreadManager;
     ServerThread serverThread;
+    ServerSocket serverSocket;
 
     public void run(){
-        try (ServerSocket serverSocket = new ServerSocket(9999)) {
+        try {
             while (true) {
-                Socket socket = serverSocket.accept();
+                //Socket socket = serverSocket.accept();
                 //Po moich zmianach:
-                serverThread=new ServerThread(socket);
+                serverThread=new ServerThread(serverSocket.accept());
+
+                // to bylo dobre w sumie przez chwile: singleThreadManager.execute(serverThread);
                 singleThreadManager.execute(serverThread);
-                /*if(socket.isConnected()){
-                    break;
-                }*/
             }
         } catch (IOException ex) {
             serverError = ex;
             // stop = true;
+            System.out.println("Zamykam watek");
             shutdown(); // shutdown cleanly after exception
         }
     }
@@ -57,7 +62,23 @@ public class Server extends Subject {
     }
 
     public void komenda(){
-        serverThread.update();
+        //serverThread.newText();
     }
+
+   /* public void komenda() {
+        try {
+            while (true) {
+                Socket socket = serverSocket.accept();
+                //Po moich zmianach:
+                serverThread=new ServerThread(socket);
+                singleThreadManager.execute(serverThread);
+            }
+        } catch (IOException ex) {
+            serverError = ex;
+            // stop = true;
+            System.out.println("Zamykam watek");
+            shutdown(); // shutdown cleanly after exception
+        }
+    }*/
 
 }
