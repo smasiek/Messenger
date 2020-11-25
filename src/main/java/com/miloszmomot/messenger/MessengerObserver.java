@@ -1,19 +1,21 @@
 package com.miloszmomot.messenger;
 
+import javax.websocket.*;
 import java.io.*;
 import java.net.Socket;
+import java.net.URI;
 import java.net.UnknownHostException;
 
+@ClientEndpoint
 public class MessengerObserver implements Observer {
 
     //TODO string zamienic na TempalateMethod chyba
     private String text;
     private Subject server;
 
-    public MessengerObserver(Subject server) {
+    public MessengerObserver() {
         text = "Pusty tekst";
-        this.server = server;
-        server.addObserver(this);
+//        server.addObserver(this);
     }
 
     public void update(String wiadomosc) {
@@ -21,7 +23,7 @@ public class MessengerObserver implements Observer {
     }
 
     public void send(String wiadomosc) {
-        server.notifyObservers(wiadomosc);
+//        server.notifyObservers(wiadomosc);
     }
 
     public void getText() {
@@ -29,50 +31,28 @@ public class MessengerObserver implements Observer {
     }
 
 
-    InputStream input;
-    BufferedReader bufferedReader;
-    String msg;
-    Socket socket;
-    OutputStream output;
-    PrintWriter writer;
-    InputStreamReader inputStreamReader;
-    public void connectToSocket(String hostname, int port) {
+    private ClientEndpointConfig clientConfig;
+    private String user;
+    Session session;
+    @OnOpen
+    public void connected(Session session, EndpointConfig clientConfig){
+        this.clientConfig = (ClientEndpointConfig) clientConfig;
+        this.user = session.getUserPrincipal().getName();
 
-        //try (Socket socket = new Socket("127.0.0.1",9999)){
-        try {
-            socket = new Socket(hostname, port);
-            input = this.socket.getInputStream();
-            inputStreamReader=new InputStreamReader(input);
-            bufferedReader = new BufferedReader(inputStreamReader);
-            output = socket.getOutputStream();
-            writer = new PrintWriter(output, true);
-            msg = bufferedReader.readLine();
-            System.out.println(msg + " - to wiadomosc odebrana z socketa");
-
-        } catch (UnknownHostException ex) {
-            System.out.println("Serwer nieosiągalny: " + ex.getMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        this.session=session;
+        System.out.println("User " + user + " connected to Chat room");
+    }
+    @OnMessage
+    public void connected(String msg){
+        System.out.println("Message from chat server: " + msg);
+    }
+    @OnClose
+    public void disconnected(Session session, CloseReason reason){
+        System.out.println("User "+ user + " disconnected as a result of "+ reason.getReasonPhrase());
+    }
+    @OnError
+    public void disconnected(Session session, Throwable error){
+        System.out.println("Error communicating with server: " + error.getMessage());
     }
 
-    public void sendMessage(String msg) throws IOException {
-        output = socket.getOutputStream();
-        //writer=new PrintWriter(output,true);
-        writer.println(msg);
-        //writer.flush();
-        // writer.close();
-    }
-
-    public void getMessage() {
-        try {
-            //  input= this.socket.getInputStream();
-            // reader = new BufferedReader(new InputStreamReader(input));
-            msg = bufferedReader.readLine();
-            System.out.println(msg + " - to wyslana wiadomosc");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
