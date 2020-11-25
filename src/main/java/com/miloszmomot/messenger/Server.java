@@ -1,57 +1,84 @@
 package com.miloszmomot.messenger;
 
 
-import javax.websocket.*;
-import javax.websocket.server.ServerContainer;
-import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static sun.plugin2.main.client.LiveConnectSupport.shutdown;
 
-@ServerEndpoint("/chat"
-        //configurator = ChatEndpointConfigurator.class, //discussed later
-       // decoders = JSONToChatObjectDecoder.class,
-       // encoders = ChatObjectToJSONEncoder.class,
-       // subprotocols = {"chat"}
-)
-public class Server{
-    WebSocketContainer container;
-    private Session session;
+public class Server extends Subject {
+    private ArrayList<Observer> observers=new ArrayList<Observer>();
 
-    @OnOpen
-    public void onOpenCallback(Session session, EndpointConfig ec){
+    public Server() throws IOException {
+        serverSocket = new ServerSocket(8080);
+    }
+
+    public void addObserver(Observer observer){
+        observers.add(observer);
+    }
+    public void removeObserver(Observer observer){
+        int observerIndex=observers.indexOf(observer);
+        System.out.println("Observer number " + observerIndex + " removed.");
+
+        observers.remove(observer);
+    }
+    //TODO zmienic string na MessageTemplate
+    public void notifyObservers(String string){
+        for (Observer observer : observers) {
+            observer.update(string);
+        }
+    }
+
+    private Exception serverError=null;
+    ExecutorService singleThreadManager;
+    ServerThread serverThread;
+    ServerSocket serverSocket;
+
+    public void run(){
         try {
-            container = ContainerProvider.getWebSocketContainer();
-            container.setDefaultMaxSessionIdleTimeout(60000); //1 min. idle session timeout
-            container.connectToServer(Server.class, URI.create("ws://messenger:8080")); //connecting to a websocket server
-            this.session=session;
-        } catch (DeploymentException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            while (true) {
+                //Socket socket = serverSocket.accept();
+                //Po moich zmianach:
+                serverThread=new ServerThread(serverSocket.accept());
 
-//fetching the ServerContainer instance (from within a Server endpoint)
-        ServerContainer container = (ServerContainer) session.getContainer();
-    }
-
-    @OnMessage
-    public void handleChatMsg(String chat) {
-        System.out.println("Got message - " + chat);
-        if(this.session!= null && this.session.isOpen()){
-            try{
-                this.session.getBasicRemote().sendText("From server: " + chat);
-            } catch (IOException e) {
-                e.printStackTrace();
+                // to bylo dobre w sumie przez chwile: singleThreadManager.execute(serverThread);
+                singleThreadManager.execute(serverThread);
             }
+        } catch (IOException ex) {
+            serverError = ex;
+            // stop = true;
+            System.out.println("Zamykam watek");
+            shutdown(); // shutdown cleanly after exception
         }
     }
 
+    public void startup(){
+        singleThreadManager= Executors.newSingleThreadExecutor();
+        start();
+    }
+
+    public void komenda(){
+        //serverThread.newText();
+    }
+
+   /* public void komenda() {
+        try {
+            while (true) {
+                Socket socket = serverSocket.accept();
+                //Po moich zmianach:
+                serverThread=new ServerThread(socket);
+                singleThreadManager.execute(serverThread);
+            }
+        } catch (IOException ex) {
+            serverError = ex;
+            // stop = true;
+            System.out.println("Zamykam watek");
+            shutdown(); // shutdown cleanly after exception
+        }
+    }*/
 
 }
