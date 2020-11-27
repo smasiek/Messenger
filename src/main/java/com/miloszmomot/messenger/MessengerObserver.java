@@ -1,8 +1,11 @@
 package com.miloszmomot.messenger;
 
 import java.io.*;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Scanner;
 
 public class MessengerObserver implements Observer {
 
@@ -10,10 +13,12 @@ public class MessengerObserver implements Observer {
     private String text;
     private Subject server;
 
+    private boolean welcomed=false;
+
     public MessengerObserver(Subject server) {
         text = "Pusty tekst";
         this.server = server;
-        server.addObserver(this);
+        //server.addObserver(this);
     }
 
     public void update(String wiadomosc) {
@@ -29,40 +34,68 @@ public class MessengerObserver implements Observer {
     }
 
 
-    InputStream input;
+    DataInputStream input;
     BufferedReader bufferedReader;
     String msg;
     Socket socket;
-    OutputStream output;
+    DataOutputStream output;
     PrintWriter writer;
     InputStreamReader inputStreamReader;
-    public void connectToSocket(String hostname, int port) {
+    public void connectToSocket(int port) {
 
         //try (Socket socket = new Socket("127.0.0.1",9999)){
         try {
-            socket = new Socket(hostname, port);
-            input = this.socket.getInputStream();
+
+            Scanner scn=new Scanner(System.in);
+
+            InetAddress ip= InetAddress.getByName("localhost");
+            socket = new Socket(ip, port);
+
+            input = new DataInputStream(this.socket.getInputStream());
             inputStreamReader=new InputStreamReader(input);
             bufferedReader = new BufferedReader(inputStreamReader);
-            output = socket.getOutputStream();
+            output = new DataOutputStream(socket.getOutputStream());
             writer = new PrintWriter(output, true);
-            msg = bufferedReader.readLine();
-            System.out.println(msg + " - to wiadomosc odebrana z socketa");
+
+            while (true){
+                if(!welcomed) {
+                    System.out.println(input.readUTF());
+                    welcomed=true;
+                }
+                String toSend= scn.nextLine();
+                output.writeUTF(toSend);
+                if(toSend.equals("exit") )
+                {
+                    System.out.println("Closing this connection : " + socket);
+                    socket.close();
+                    System.out.println("Connection closed");
+                    break;
+                }
+
+                String received = input.readUTF();
+                System.out.println(received);
+            }
+
+            //msg = bufferedReader.readLine();
+            System.out.println(msg);
+
+            scn.close();
+            input.close();
+            output.close();
 
         } catch (UnknownHostException ex) {
             System.out.println("Serwer nieosiągalny: " + ex.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public void sendMessage(String msg) throws IOException {
-        output = socket.getOutputStream();
+        //output = socket.getOutputStream();
         //writer=new PrintWriter(output,true);
         writer.println(msg);
-        //writer.flush();
-        // writer.close();
+        writer.flush();
+        writer.close();
     }
 
     public void getMessage() {
