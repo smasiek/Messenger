@@ -17,12 +17,13 @@ public abstract class ChainElement {
         if (checkDataType(messageTemplate.getPreambula())) {
             return handleConcreteRequest(messageTemplate);
         } else {
-            nextElement.handleRequest(messageTemplate);
+            return nextElement.handleRequest(messageTemplate);
         }
-        return "Unknown type of message";
+        //return "Unknown type of message";
     }
     public abstract Object handleConcreteRequest(MessageTemplate messageTemplate);
     public boolean checkDataType(byte dataType){
+        //return true;
         return this.dataType==dataType;
     }
 
