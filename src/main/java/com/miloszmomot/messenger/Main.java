@@ -1,16 +1,13 @@
 package com.miloszmomot.messenger;
 
-import java.io.*;
-
-import static java.lang.Thread.sleep;
-
 public class Main {
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args){
 
         MessengerClient observer = new MessengerClient();
 
-        int port=8080;
+        int port=5657;
         observer.connectToSocket(port);
+
     }
 }
