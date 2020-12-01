@@ -100,7 +100,9 @@ public class MessengerClient extends JFrame implements Chatable, MouseListener {
                 int premabula = -1;
                 try {
                     output.write(prepareBytes("exit".getBytes(), (byte) premabula));
-                } catch (IOException ex) {
+                } catch (IOException | NullPointerException ex) {
+                    System.out.println("Closing app. There was problem with connection");
+                    runReadThread = false;
                     ex.printStackTrace();
                     System.exit(0);
                 }
