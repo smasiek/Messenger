@@ -1,12 +1,11 @@
 package com.miloszmomot.messenger;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public class ImageElement extends ChainElement{
+public class ImageElement extends ChainElement {
     public ImageElement(byte dataType) {
         super(dataType);
     }
@@ -14,7 +13,7 @@ public class ImageElement extends ChainElement{
     @Override
     public BufferedImage handleConcreteRequest(MessageTemplate messageTemplate) {
 
-        BufferedImage bImage= null;
+        BufferedImage bImage = null;
         try {
             ByteArrayInputStream bis = new ByteArrayInputStream(messageTemplate.getBytes());
             bImage = ImageIO.read(bis);

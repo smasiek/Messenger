@@ -9,6 +9,6 @@ public class TextElement extends ChainElement {
 
     @Override
     public String handleConcreteRequest(MessageTemplate messageTemplate) {
-            return new String(messageTemplate.getBytes(), StandardCharsets.UTF_8);
+        return new String(messageTemplate.getBytes(), StandardCharsets.UTF_8);
     }
 }
